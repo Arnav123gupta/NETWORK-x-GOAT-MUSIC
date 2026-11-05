@@ -1,7 +1,7 @@
 import type { PairingStatusResponse } from '@/lib/types'
 export * from '@/lib/types'
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL
+const backendUrl = process.env.BACKEND_API_URL
 
 export function backendConfigured() { return Boolean(backendUrl) }
 
