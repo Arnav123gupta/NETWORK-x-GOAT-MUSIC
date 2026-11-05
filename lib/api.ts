@@ -18,7 +18,7 @@ export type ServerInfo = {
 
 export type ServersResponse = { servers: ServerInfo[]; source: 'persistent-backend' }
 export type PairingRequest = { phoneNumber: string; serverId: string }
-export type PairingRequestResponse = { requestId: string; status: 'pending' | 'rejected'; message: string }
+export type PairingRequestResponse = { requestId: string; status: 'pending' | 'paired' | 'failed' | 'rejected'; message: string }
 export type PairingStatusResponse = { requestId: string; status: 'pending' | 'paired' | 'failed'; message?: string }
 
 const backendUrl = process.env.MUSIC_BACKEND_API_URL
