@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { PairingStatusResponse } from '@/lib/types'
 import { Activity, Check, ChevronRight, CircleHelp, Gauge, LayoutDashboard, Menu, MessageCircle, Music2, Radio, RefreshCw, Server, ShieldCheck, Terminal, X, Zap } from 'lucide-react'
 
@@ -21,12 +21,29 @@ const navItems: { id: Page; label: string; icon: typeof Radio }[] = [
   { id: 'home', label: 'Home', icon: Radio }, { id: 'pairing', label: 'Pairing', icon: MessageCircle }, { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }, { id: 'commands', label: 'Commands', icon: Terminal }, { id: 'about', label: 'About', icon: CircleHelp },
 ]
 
+function MusicBackendStatus() {
+  const [status, setStatus] = useState<'online' | 'offline' | 'not_configured' | 'unavailable'>('unavailable')
+  useEffect(() => {
+    let active = true
+    fetch('/api/music/status', { cache: 'no-store' })
+      .then(async (response) => {
+        const data = await response.json() as { status?: string }
+        if (!active) return
+        setStatus(response.ok && data.status === 'online' ? 'online' : data.status === 'not_configured' ? 'not_configured' : response.ok ? 'unavailable' : 'offline')
+      })
+      .catch(() => { if (active) setStatus('offline') })
+    return () => { active = false }
+  }, [])
+  const label = status === 'online' ? 'Music Backend Online' : status === 'not_configured' ? 'Music Service Not Configured' : status === 'offline' ? 'Music Backend Offline' : 'Music Search Unavailable'
+  return <div className="hidden items-center gap-2 text-[10px] font-medium uppercase tracking-[0.15em] text-white/45 sm:flex"><span className={`status-dot ${status === 'online' ? '' : 'status-dot-muted'}`}/>{label}</div>
+}
+
 export function MusicBotSite() {
   const [page, setPage] = useState<Page>('home')
   const [mobileOpen, setMobileOpen] = useState(false)
   const navigate = (next: Page) => { setPage(next); setMobileOpen(false) }
   return <main className="min-h-screen overflow-hidden bg-[#090405] text-white selection:bg-red-500/30"><div className="energy energy-one"/><div className="energy energy-two"/><div className="noise"/>
-    <header className="relative z-20 mx-auto flex max-w-[1400px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12"><button className="group flex items-center gap-3 text-left" onClick={() => navigate('home')} aria-label="Go to home"><div className="brand-mark"><Music2 size={20}/></div><div><div className="font-display text-sm font-bold tracking-[0.2em] sm:text-base">NETWORK X GOAT</div><div className="text-[9px] font-semibold tracking-[0.35em] text-red-400/70">MUSIC MD</div></div></button><nav className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.035] p-1.5 lg:flex" aria-label="Primary navigation">{navItems.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => navigate(id)} className={`nav-link ${page === id ? 'nav-active' : ''}`}><Icon size={14}/>{label}</button>)}</nav><div className="flex items-center gap-2"><div className="hidden items-center gap-2 text-[10px] font-medium uppercase tracking-[0.15em] text-white/45 sm:flex"><span className="status-dot"/> Backend-backed pairing</div><button className="mobile-menu lg:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">{mobileOpen ? <X size={19}/> : <Menu size={19}/>}</button></div></header>
+    <header className="relative z-20 mx-auto flex max-w-[1400px] items-center justify-between px-5 py-5 sm:px-8 lg:px-12"><button className="group flex items-center gap-3 text-left" onClick={() => navigate('home')} aria-label="Go to home"><div className="brand-mark"><Music2 size={20}/></div><div><div className="font-display text-sm font-bold tracking-[0.2em] sm:text-base">NETWORK X GOAT</div><div className="text-[9px] font-semibold tracking-[0.35em] text-red-400/70">MUSIC MD</div></div></button><nav className="hidden items-center gap-1 rounded-full border border-white/10 bg-white/[0.035] p-1.5 lg:flex" aria-label="Primary navigation">{navItems.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => navigate(id)} className={`nav-link ${page === id ? 'nav-active' : ''}`}><Icon size={14}/>{label}</button>)}</nav><div className="flex items-center gap-2"><MusicBackendStatus /><button className="mobile-menu lg:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">{mobileOpen ? <X size={19}/> : <Menu size={19}/>}</button></div></header>
     {mobileOpen && <div className="relative z-30 mx-5 grid gap-1 rounded-2xl border border-white/10 bg-[#16090b]/95 p-2 shadow-2xl backdrop-blur-xl lg:hidden">{navItems.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => navigate(id)} className={`nav-link justify-start ${page === id ? 'nav-active' : ''}`}><Icon size={15}/>{label}</button>)}</div>}
     <div className="relative z-10 mx-auto max-w-[1400px] px-5 pb-8 sm:px-8 lg:px-12"><div className="h-px bg-gradient-to-r from-transparent via-red-500/25 to-transparent"/>{page === 'home' || page === 'pairing' ? <PairingPage onNavigate={navigate}/> : <ContentPage page={page} onNavigate={navigate}/>}</div>
     <footer className="relative z-10 mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-3 border-t border-white/[0.07] px-5 py-5 text-[10px] uppercase tracking-[0.16em] text-white/30 sm:flex-row sm:px-8 lg:px-12"><span>© 2026 Network X Goat Music MD. All rights reserved.</span><span className="flex items-center gap-2"><ShieldCheck size={13} className="text-red-400"/> Secure pairing infrastructure</span></footer>
