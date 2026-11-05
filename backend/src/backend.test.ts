@@ -27,7 +27,7 @@ test('pairing rejects invalid phone numbers', () => {
 })
 
 test('pairing failure is persisted when WhatsApp is unconfigured', async () => {
-  const pairing = await createPairingRequest('+919876543210', 'server-1')
+  const pairing = await createPairingRequest('919876543210', 'server-1')
   assert.equal(pairing.status, 'failed')
   assert.match(pairing.message, /authorized provider adapter/)
 })
