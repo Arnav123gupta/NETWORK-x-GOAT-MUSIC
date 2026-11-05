@@ -10,7 +10,10 @@ class HttpMusicProvider implements MusicProvider {
     const isItunes = this.baseUrl.includes('itunes.apple.com')
     const url = isItunes ? `${this.baseUrl}/search?media=music&limit=25&term=${encodeURIComponent(query)}` : `${this.baseUrl}/search?q=${encodeURIComponent(query)}`
     const response = await fetch(url, { signal: AbortSignal.timeout(8000) })
-    if (!response.ok) throw new Error(`Music provider returned HTTP ${response.status}.`)
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '')
+      throw new Error(`Music provider returned HTTP ${response.status}${detail ? `: ${detail.slice(0, 160)}` : '.'}`)
+    }
     const payload = await response.json() as { results?: Array<{ title?: string; artist?: string; duration?: string; url?: string; trackName?: string; artistName?: string; trackTimeMillis?: number; previewUrl?: string }> }
     return (payload.results ?? []).map((item) => ({
       title: item.title ?? item.trackName ?? 'Unknown track',
