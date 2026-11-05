@@ -29,12 +29,12 @@ function MusicBackendStatus() {
       .then(async (response) => {
         const data = await response.json() as { status?: string }
         if (!active) return
-        setStatus(response.ok && data.status === 'online' ? 'online' : data.status === 'not_configured' ? 'not_configured' : response.ok ? 'unavailable' : 'offline')
+        setStatus(data.status === 'online' ? 'online' : data.status === 'not_configured' ? 'not_configured' : response.ok ? 'unavailable' : 'offline')
       })
       .catch(() => { if (active) setStatus('offline') })
     return () => { active = false }
   }, [])
-  const label = status === 'online' ? 'Music Backend Online' : status === 'not_configured' ? 'Music Service Not Configured' : status === 'offline' ? 'Music Backend Offline' : 'Music Search Unavailable'
+  const label = status === 'online' ? 'Music Backend Online' : status === 'not_configured' ? 'Music Provider Not Configured' : status === 'offline' ? 'Music Backend Offline' : 'Music Search Unavailable'
   return <div className="hidden items-center gap-2 text-[10px] font-medium uppercase tracking-[0.15em] text-white/45 sm:flex"><span className={`status-dot ${status === 'online' ? '' : 'status-dot-muted'}`}/>{label}</div>
 }
 
