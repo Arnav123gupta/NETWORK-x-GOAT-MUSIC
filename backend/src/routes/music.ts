@@ -1,11 +1,15 @@
 import { Router } from 'express'
 import { z } from 'zod'
-import { configuredProvider, searchMusic } from '../services/music.js'
+import { configuredProvider, musicHealth, searchMusic } from '../services/music.js'
 
 const searchSchema = z.object({ query: z.string().trim().min(1).max(200) })
 export const musicRouter = Router()
-musicRouter.get('/health', (_request, response) => {
-  response.json({ status: configuredProvider() ? 'online' : 'not_configured', providerConfigured: configuredProvider() })
+musicRouter.get('/health', async (_request, response, next) => {
+  try { response.json({ ...(await musicHealth()), providerConfigured: configuredProvider() }) } catch (error) { next(error) }
+})
+
+musicRouter.get('/status', async (_request, response, next) => {
+  try { response.json({ ...(await musicHealth()), providerConfigured: configuredProvider() }) } catch (error) { next(error) }
 })
 musicRouter.get('/status', (_request, response) => {
   response.json({ status: configuredProvider() ? 'online' : 'not_configured', providerConfigured: configuredProvider() })
