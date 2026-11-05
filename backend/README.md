@@ -10,7 +10,7 @@ pnpm install
 pnpm dev
 ```
 
-The API listens on `http://localhost:8787` by default. Set `MUSIC_BACKEND_API_URL=http://localhost:8787` in the Next.js app to use it through the existing server-only proxy routes.
+The API listens on `http://localhost:8787` by default. Set `NEXT_PUBLIC_BACKEND_API_URL=http://localhost:8787/api` in the Next.js app to use it through the existing proxy routes. Keep provider credentials and session paths in `backend/.env`; never expose them with a `NEXT_PUBLIC_` variable.
 
 ## Production integration
 

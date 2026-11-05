@@ -1,27 +1,7 @@
-export type ApiError = { error: string; code?: string }
+import type { PairingStatusResponse } from '@/lib/types'
+export * from '@/lib/types'
 
-export type HealthResponse = {
-  configured: boolean
-  status: 'ok' | 'unconfigured' | 'unavailable'
-  service: string
-  checkedAt: string
-  message?: string
-}
-
-export type ServerInfo = {
-  id: string
-  name: string
-  region: string
-  load: number
-  status: 'online' | 'offline' | 'maintenance'
-}
-
-export type ServersResponse = { servers: ServerInfo[]; source: 'persistent-backend' }
-export type PairingRequest = { phoneNumber: string; serverId: string }
-export type PairingRequestResponse = { requestId: string; status: 'pending' | 'paired' | 'failed' | 'rejected'; message: string }
-export type PairingStatusResponse = { requestId: string; status: 'pending' | 'paired' | 'failed'; message?: string }
-
-const backendUrl = process.env.MUSIC_BACKEND_API_URL
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL
 
 export function backendConfigured() { return Boolean(backendUrl) }
 
