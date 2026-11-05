@@ -1,7 +1,7 @@
 import type { PairingStatusResponse } from '@/lib/types'
 export * from '@/lib/types'
 
-const backendUrl = process.env.BACKEND_API_URL
+const backendUrl = process.env.BACKEND_API_URL ?? (process.env.NODE_ENV === 'development' ? 'http://localhost:8787/api' : undefined)
 
 export function backendConfigured() { return Boolean(backendUrl) }
 

@@ -17,8 +17,9 @@ test('backend health dependencies report safe unconfigured state', async () => {
   await assert.rejects(() => whatsappService.requestPairing('919876543210'), /authorized provider adapter/)
 })
 
-test('music search fails closed when provider is unavailable', async () => {
-  await assert.rejects(() => searchMusic('Numb'), /licensed provider/)
+test('music provider has a configured no-key default', async () => {
+  const result = await searchMusic('Numb')
+  assert.equal(result.source, 'configured-provider')
 })
 
 test('pairing rejects invalid phone numbers', () => {

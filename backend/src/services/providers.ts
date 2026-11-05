@@ -9,5 +9,5 @@ export interface WhatsAppAdapter {
 
 export interface MusicProvider {
   search(query: string): Promise<Array<{ title: string; artist: string; duration: string; url?: string }>>
-  health(): Promise<{ status: 'online' | 'offline'; provider: string; message?: string }>
+  health(): Promise<{ status: 'online' | 'offline' | 'not_configured'; provider: string; message?: string }>
 }
