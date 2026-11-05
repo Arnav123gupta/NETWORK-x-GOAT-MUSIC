@@ -9,6 +9,11 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   API_KEY: z.string().min(16).optional(),
   WHATSAPP_SESSION_DIR: z.string().default('./data/whatsapp-sessions'),
+  WHATSAPP_ACCESS_TOKEN: z.string().min(20).optional(),
+  WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+  WHATSAPP_GRAPH_API_VERSION: z.string().default('v22.0'),
+  WHATSAPP_WEBHOOK_VERIFY_TOKEN: z.string().min(16).optional(),
+  WHATSAPP_APP_SECRET: z.string().min(16).optional(),
   MUSIC_PROVIDER_URL: z.string().url().optional(),
 })
 

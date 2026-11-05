@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs'
 import { config } from '../config.js'
 import type { BotStatus, ConnectionStatus } from '../types/index.js'
 import type { WhatsAppAdapter } from './providers.js'
+import { WhatsAppCloudApiAdapter } from './whatsappCloudApi.js'
 
 class UnconfiguredWhatsAppAdapter implements WhatsAppAdapter {
   private status: BotStatus = this.makeStatus('unconfigured')
@@ -31,7 +32,7 @@ class UnconfiguredWhatsAppAdapter implements WhatsAppAdapter {
 
 export class WhatsAppService {
   private status: BotStatus = { status: 'unconfigured', service: 'whatsapp', checkedAt: new Date().toISOString() }
-  private readonly adapter: WhatsAppAdapter = new UnconfiguredWhatsAppAdapter()
+  private readonly adapter: WhatsAppAdapter = new WhatsAppCloudApiAdapter()
 
   async initialize() {
     await this.adapter.initialize(config.WHATSAPP_SESSION_DIR, (status) => { this.status = status })
@@ -43,6 +44,7 @@ export class WhatsAppService {
   }
 
   async shutdown() { await this.adapter.shutdown(); this.status = this.adapter.getStatus() }
+  async handleWebhook(_payload: unknown) { this.status = { ...this.status, status: 'connected', checkedAt: new Date().toISOString(), lastError: undefined } }
   getStatus() { return this.status }
   getSessionDirectory() { return config.WHATSAPP_SESSION_DIR }
 }

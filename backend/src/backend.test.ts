@@ -12,9 +12,9 @@ const { createPairingRequest } = await import('./services/pairing.js')
 
 test('backend health dependencies report safe unconfigured state', async () => {
   await whatsappService.initialize()
-  assert.equal(whatsappService.getStatus().service, 'whatsapp')
+  assert.equal(whatsappService.getStatus().service, 'whatsapp-cloud-api')
   assert.equal(whatsappService.getStatus().status, 'unconfigured')
-  await assert.rejects(() => whatsappService.requestPairing('919876543210'), /authorized provider adapter/)
+  await assert.rejects(() => whatsappService.requestPairing('919876543210'), /does not support QR|Register and verify/)
 })
 
 test('music provider has a configured no-key default', async () => {
@@ -29,7 +29,7 @@ test('pairing rejects invalid phone numbers', () => {
 test('pairing failure is persisted when WhatsApp is unconfigured', async () => {
   const pairing = await createPairingRequest('919876543210', 'server-1')
   assert.equal(pairing.status, 'failed')
-  assert.match(pairing.message, /authorized provider adapter/)
+  assert.match(pairing.message, /Configure|Register/)
 })
 
 test('API authentication rejects missing credentials', () => {
