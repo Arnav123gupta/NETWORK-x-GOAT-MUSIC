@@ -23,5 +23,6 @@ export type BotStatus = {
   service: string
   phoneNumber?: string
   lastError?: string
+  lastWebhookAt?: string
   checkedAt: string
 }
