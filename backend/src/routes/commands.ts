@@ -1,10 +1,18 @@
 import { Router } from 'express'
 
 export const commandsRouter = Router()
-commandsRouter.get('/', (_request, response) => response.json({ commands: [
-  { name: 'play', description: 'Play a track or search result' },
-  { name: 'pause', description: 'Pause the current track' },
-  { name: 'skip', description: 'Skip to the next track' },
-  { name: 'queue', description: 'Show the current queue' },
-  { name: 'help', description: 'Show available commands' },
-], source: 'backend' }))
+
+// These are the planned command names, not active WhatsApp handlers.
+// Incoming-message dispatch is not implemented by the current Cloud API adapter.
+commandsRouter.get('/', (_request, response) => response.json({
+  commands: [
+    { name: '.menu', description: 'Show the command menu', available: false },
+    { name: '.ping', description: 'Check bot response time', available: false },
+    { name: '.help', description: 'Show command help', available: false },
+    { name: '.status', description: 'Show verified service status', available: false },
+    { name: '.song', description: 'Search the authorized music catalog', available: false },
+    { name: '.play', description: 'Open an authorized track or preview', available: false },
+  ],
+  source: 'planned-command-catalog',
+  message: 'Commands are listed for reference only. WhatsApp message handling is not enabled yet.'
+}))
