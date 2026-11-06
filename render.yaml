@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: network-x-goat-music-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 8787
+      - key: CORS_ORIGIN
+        value: https://networkxgoat-music.vercel.app
+      - key: DATABASE_PATH
+        value: /tmp/network-x-goat-music.sqlite
+      - key: WHATSAPP_SESSION_DIR
+        value: /tmp/whatsapp-sessions
+      - key: WHATSAPP_GRAPH_API_VERSION
+        value: v22.0
+      - key: API_KEY
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_WEBHOOK_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
