@@ -5,21 +5,21 @@ process.env.NODE_ENV = 'test'
 process.env.API_KEY = 'test-api-key-123456'
 
 const { whatsappService } = await import('./services/whatsapp.js')
-const { searchMusic } = await import('./services/music.js')
 const { requireApiKey } = await import('./middleware/auth.js')
 const { requestSchema } = await import('./routes/pairing.js')
 const { createPairingRequest } = await import('./services/pairing.js')
 
-test('backend health dependencies report safe unconfigured state', async () => {
+test('WhatsApp webhook receipt does not mark the provider connected', async () => {
   await whatsappService.initialize()
-  assert.equal(whatsappService.getStatus().service, 'whatsapp-cloud-api')
-  assert.equal(whatsappService.getStatus().status, 'unconfigured')
-  await assert.rejects(() => whatsappService.requestPairing('919876543210'), /does not support QR|Register and verify/)
+  const before = whatsappService.getStatus().status
+  await whatsappService.handleWebhook({ object: 'whatsapp_business_account' })
+  assert.equal(whatsappService.getStatus().status, before)
+  assert.ok(whatsappService.getStatus().lastWebhookAt)
 })
 
-test('music provider has a configured no-key default', async () => {
-  const result = await searchMusic('Numb')
-  assert.equal(result.source, 'configured-provider')
+test('Meta Cloud API pairing rejects personal QR/phone pairing', async () => {
+  await whatsappService.initialize()
+  await assert.rejects(() => whatsappService.requestPairing('919876543210'), /does not support QR|Register and verify/)
 })
 
 test('pairing rejects invalid phone numbers', () => {

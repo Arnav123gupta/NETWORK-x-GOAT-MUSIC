@@ -44,7 +44,12 @@ export class WhatsAppService {
   }
 
   async shutdown() { await this.adapter.shutdown(); this.status = this.adapter.getStatus() }
-  async handleWebhook(_payload: unknown) { this.status = { ...this.status, status: 'connected', checkedAt: new Date().toISOString(), lastError: undefined } }
+
+  async handleWebhook(_payload: unknown) {
+    // Receiving a signed webhook proves event delivery, not that the account is connected.
+    this.status = { ...this.status, lastWebhookAt: new Date().toISOString() }
+  }
+
   getStatus() { return this.status }
   getSessionDirectory() { return config.WHATSAPP_SESSION_DIR }
 }

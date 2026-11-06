@@ -1,7 +1,11 @@
 import { config } from '../config.js'
 import type { MusicProvider } from './providers.js'
 
-export type MusicSearchResult = { query: string; results: Array<{ title: string; artist: string; duration: string; url?: string }>; source: 'configured-provider' | 'unconfigured' }
+export type MusicSearchResult = {
+  query: string
+  results: Array<{ title: string; artist: string; duration: string; previewUrl?: string; trackUrl?: string }>
+  source: 'configured-provider' | 'public-catalog-fallback'
+}
 
 class HttpMusicProvider implements MusicProvider {
   constructor(private readonly baseUrl: string) {}
@@ -14,31 +18,37 @@ class HttpMusicProvider implements MusicProvider {
       const detail = await response.text().catch(() => '')
       throw new Error(`Music provider returned HTTP ${response.status}${detail ? `: ${detail.slice(0, 160)}` : '.'}`)
     }
-    const payload = await response.json() as { results?: Array<{ title?: string; artist?: string; duration?: string; url?: string; trackName?: string; artistName?: string; trackTimeMillis?: number; previewUrl?: string }> }
+    const payload = await response.json() as { results?: Array<{ title?: string; artist?: string; duration?: string; url?: string; trackUrl?: string; previewUrl?: string; trackName?: string; artistName?: string; trackTimeMillis?: number; trackViewUrl?: string }> }
     return (payload.results ?? []).map((item) => ({
       title: item.title ?? item.trackName ?? 'Unknown track',
       artist: item.artist ?? item.artistName ?? 'Unknown artist',
       duration: item.duration ?? (item.trackTimeMillis ? `${Math.round(item.trackTimeMillis / 60000)} min` : '—'),
-      url: item.url ?? item.previewUrl,
+      previewUrl: item.previewUrl,
+      trackUrl: item.trackUrl ?? item.trackViewUrl ?? item.url,
     }))
   }
 
   async health() {
-    if (this.baseUrl.includes('itunes.apple.com')) return { status: 'online' as const, provider: 'Apple iTunes Search API' }
+    const isItunes = this.baseUrl.includes('itunes.apple.com')
+    const healthUrl = isItunes ? `${this.baseUrl}/search?media=music&limit=1&term=healthcheck` : `${this.baseUrl}/health`
     try {
-      const response = await fetch(`${this.baseUrl}/health`, { signal: AbortSignal.timeout(3000) })
-      return { status: response.ok ? 'online' as const : 'offline' as const, provider: this.baseUrl }
+      const response = await fetch(healthUrl, { signal: AbortSignal.timeout(4000) })
+      return {
+        status: response.ok ? 'online' as const : 'offline' as const,
+        provider: isItunes ? 'Apple iTunes public catalog (preview links only)' : this.baseUrl,
+        ...(!response.ok ? { message: `Provider health check returned HTTP ${response.status}.` } : {})
+      }
     } catch {
-      return { status: 'offline' as const, provider: this.baseUrl, message: 'Provider health check failed.' }
+      return { status: 'offline' as const, provider: isItunes ? 'Apple iTunes public catalog' : this.baseUrl, message: 'Provider health check failed.' }
     }
   }
 }
 
 export const musicProvider: MusicProvider = new HttpMusicProvider(config.MUSIC_PROVIDER_URL ?? 'https://itunes.apple.com')
-export function configuredProvider() { return true }
+export function configuredProvider() { return Boolean(config.MUSIC_PROVIDER_URL) }
 export async function musicHealth() { return musicProvider.health() }
 
 export async function searchMusic(query: string): Promise<MusicSearchResult> {
-  if (!musicProvider) throw new Error('Music search is unavailable until a licensed provider is configured.')
-  return { query, results: await musicProvider.search(query), source: 'configured-provider' }
+  const results = await musicProvider.search(query)
+  return { query, results, source: configuredProvider() ? 'configured-provider' : 'public-catalog-fallback' }
 }
