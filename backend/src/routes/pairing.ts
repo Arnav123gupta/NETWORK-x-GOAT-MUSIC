@@ -2,7 +2,8 @@ import { Router } from 'express'
 import { z } from 'zod'
 import { createPairingRequest, getPairingStatus } from '../services/pairing.js'
 
-const requestSchema = z.object({ phoneNumber: z.string().regex(/^\+[1-9]\d{7,14}$/, 'Use an international phone number.'), serverId: z.string().min(1) })
+const internationalPhone = z.string().transform((value) => value.replace(/\D/g, '')).refine((value) => /^[1-9]\d{7,14}$/.test(value), 'Use an international phone number.')
+export const requestSchema = z.object({ phoneNumber: internationalPhone, serverId: z.string().min(1) })
 export const pairingRouter = Router()
 pairingRouter.post('/request', async (request, response, next) => {
   try {

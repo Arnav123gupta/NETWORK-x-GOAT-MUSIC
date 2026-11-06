@@ -12,12 +12,16 @@ import { dashboardRouter } from './routes/dashboard.js'
 import { musicRouter } from './routes/music.js'
 import { botRouter } from './routes/bot.js'
 import { whatsappService } from './services/whatsapp.js'
+import { rateLimit } from './middleware/rateLimit.js'
+import { whatsappWebhookRouter } from './routes/whatsappWebhook.js'
 
-export const logger = pino({ level: config.NODE_ENV === 'development' ? 'debug' : 'info' })
+export const logger = pino({ level: config.NODE_ENV === 'development' ? 'debug' : 'info', redact: ['req.headers.authorization', 'req.headers.x-api-key', 'phoneNumber'] })
 export const app = express()
 app.disable('x-powered-by')
-app.use(cors({ origin: config.CORS_ORIGIN.split(',').map((value) => value.trim()) }))
-app.use(express.json({ limit: '32kb' }))
+app.use(cors({ origin: config.CORS_ORIGIN.split(',').map((value) => value.trim()), credentials: false, methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key'] }))
+app.use(rateLimit)
+app.use('/api/webhooks/whatsapp', express.raw({ type: 'application/json', limit: '256kb' }), whatsappWebhookRouter)
+app.use(express.json({ limit: '32kb', strict: true }))
 app.use('/api/health', healthRouter)
 app.use('/api/servers', requireApiKey, serversRouter)
 app.use('/api/pairing', requireApiKey, pairingRouter)
