@@ -3,6 +3,7 @@ services:
     name: network-x-goat-music-backend
     runtime: docker
     plan: free
+    region: singapore
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     healthCheckPath: /api/health
@@ -12,7 +13,7 @@ services:
       - key: HOST
         value: 0.0.0.0
       - key: PORT
-        value: 8787
+        value: 10000
       - key: CORS_ORIGIN
         value: https://networkxgoat-music.vercel.app
       - key: DATABASE_PATH
